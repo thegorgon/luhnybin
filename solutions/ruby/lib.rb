@@ -36,3 +36,19 @@ def mask_number(number)
     unmasked
   end
 end
+
+def mask(input)
+  characters = input.split('')
+  masked = ""
+  
+  loop do
+    if characters.first =~ /\d/
+      masked << mask_number(characters)
+    elsif characters.first
+      masked << characters.shift
+    else
+      break
+    end
+  end
+  masked
+end
