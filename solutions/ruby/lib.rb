@@ -5,6 +5,7 @@ class NumberMask
   MASKED_DIGIT = "X"
   MIN_LENGTH = 14
   MAX_LENGTH = 16
+  DOUBLED_NUMS = [0, 2, 4, 6, 8, 1, 3, 5, 7, 9]
   
   def initialize(string="")
     @input = string
@@ -67,7 +68,7 @@ class NumberMask
   def valid_luhn?(array)
     sum = 0
     array.reverse.each_with_index do |num, idx|
-      sum += idx.odd?? (num * 2).to_s.split('').inject(0) { |memo, x| memo += x.to_i } : num
+      sum += idx.odd?? DOUBLED_NUMS[num] : num
     end
     sum.modulo(10) == 0
   end
