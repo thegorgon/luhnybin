@@ -17,7 +17,7 @@ class NumberMask
       @index = 0
       @mask = Set.new
       
-      while (@index < @characters.length - 13) do
+      while (@index < @characters.length - 14) do
         char = @characters[@index]
         mask_number if char =~ /\d/
         @index += 1
@@ -46,10 +46,8 @@ class NumberMask
         numbers << char.to_i
         number_indices << index
         index += 1
-                
-        if cc_number?(numbers)
-          @mask = @mask | number_indices
-        end
+        
+        @mask = @mask | number_indices if cc_number?(numbers)
         break if numbers.length == MAX_LENGTH
       else
         break
