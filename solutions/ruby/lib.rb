@@ -1,29 +1,31 @@
 require 'fileutils'
+require 'set'
 
-class Masker 
+class NumberMask 
   MASKED_DIGIT = "X"
   MIN_LENGTH = 14
   MAX_LENGTH = 16
   
-  def initialize(string)
+  def initialize(string="")
     @input = string
     @characters = @input.split('')
   end
   
   def masked
     unless @masked
-      @masked = ""
       @index = 0
-      while (@index < @characters.length) do
+      @mask = Set.new
+      
+      while (@index < @characters.length - 13) do
         char = @characters[@index]
-
-        if char =~ /\d/ && number = mask_number
-          masked << number
-        else
-          masked << @characters[@index]
-          @index += 1
-        end
+        mask_number if char =~ /\d/
+        @index += 1
       end
+      
+      @mask.each do |index|
+        @characters[index] = MASKED_DIGIT
+      end
+      @masked = @characters.join('')
     end
     @masked
   end
@@ -32,34 +34,34 @@ class Masker
   
   def mask_number
     index = @index
-    masked = ""
     numbers = []
-
+    number_indices = []
+    
     loop do
       char = @characters[index]
       if char == '-' || char == ' '
-        masked << char
         index += 1
       elsif char =~ /\d/
-        if cc_number?(numbers) && !cc_number?(numbers + [char.to_i])
-          @index = index
-          break
-        else
-          numbers << char.to_i
-          masked << MASKED_DIGIT
-          index += 1
+        numbers << char.to_i
+        number_indices << index
+        index += 1
+                
+        if cc_number?(numbers)
+          @mask = @mask | number_indices
         end
+        break if numbers.length == MAX_LENGTH
       else
-        @index = index if cc_number?(numbers)
         break
       end
     end
-
-    @index == index && masked
   end
   
   def cc_number?(numbers)
-    numbers.length >= MIN_LENGTH && numbers.length <= MAX_LENGTH && valid_luhn?(numbers)
+    valid_length?(numbers) && valid_luhn?(numbers)
+  end
+  
+  def valid_length?(numbers)
+    numbers.length >= MIN_LENGTH && numbers.length <= MAX_LENGTH
   end
   
   def valid_luhn?(array)
